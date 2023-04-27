@@ -51,7 +51,7 @@ i2c.writeto_mem(imu_addr,127,b'\x10')
 i2c.writeto_mem(imu_addr,127,b'\x00')
 
 
-time.sleep(1)
+time.sleep_ms(1000)
 
 # Continuously read and print accelerometer data
 while True:    
@@ -78,5 +78,5 @@ while True:
     
     # Print the accelerometer data
     print("Accelerometer: X={:.2f}m/s², Y={:.2f}m/s², Z={:.2f}m/s²".format(acc_x, acc_y, acc_z))
-    time.sleep(0.1)
+    time.sleep_ms(100)
 
