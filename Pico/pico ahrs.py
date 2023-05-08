@@ -1,8 +1,8 @@
 # Denne koden leser av og printer verdien av accelerometeren, gyroskop og magnetometer på IMU modulen 
 # Det er bare å kopiere inn i Thonny og kjøre den. Den funker på Pico w, usikker om den kjører på vanlig Pico
-import imufusion
 import machine
 import time
+import utime
 
 # Define the I2C bus
 sdaPIN=machine.Pin(4)
@@ -45,30 +45,14 @@ i2c.writeto_mem(imu_addr, 0x14, b'\x01') # Set accelerometer full scale range to
 # (see the module datasheet for details)
 i2c.writeto_mem(mag_addr,0x31,b'\x08') # Enable magnetometer
 
-i2c.writeto_mem(mag_addr,127,bank0) # Select bank 0
+i2c.writeto_mem(imu_addr,127,bank0) # Select bank 0
 
-# Import sensor data
-
-sample_rate = 100  # 100 Hz
-
-# Instantiate algorithms
-ahrs = imufusion.Ahrs()
-
-ahrs.settings = imufusion.Settings(imufusion.CONVENTION_NWU,  # convention
-                                   0.5,  # gain
-                                   10,  # acceleration rejection
-                                   20,  # magnetic rejection
-                                   5 * sample_rate)  # rejection timeout = 5 seconds
-
-# Process sensor data
-dt = 1 / sample_rate 
-
-
-
-time.sleep_ms(1000)
+time.sleep_ms(5000)
 
 # Continuously read and print accelerometer data
 while True:    
+    startTime = utime.ticks_us()
+
     # Read data from accelerometer and gyroscope
     # Read 6 bytes of accelerometer data from the module's data registers
     acc_raw = i2c.readfrom_mem(imu_addr, 0x2d, 6)
@@ -130,23 +114,11 @@ while True:
         mag_z -= 65536
     mag_z = mag_z / 6.66
     
-    accel = [acc_x, acc_y, acc_z]
-    gyro = [gyr_x, gyr_y, gyr_z]
-    mag = [mag_x, mag_y, mag_z]
-    
-    
-    ahrs.update(gyro, accel, mag, dt)
+    print (startTime,",", acc_x,",", acc_y ,",", acc_z,",", gyr_x,",", gyr_y,",", gyr_z,",", mag_x,",", mag_y,",", mag_z)
 
-    euler = ahrs.quaternion.to_euler()
-
-    roll = euler[0]
-    pitch = euler[1]
-    yaw = euler[2]   
-
-    # Print euler angles
-    print("roll: ", roll, "pitch: ", pitch, "yaw: ", yaw)
 
     time.sleep_ms(10)
+
 
 
 
